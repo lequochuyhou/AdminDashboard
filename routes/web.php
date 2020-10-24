@@ -57,6 +57,8 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 
     //Supplier
     Route::get('/get_supplier', [\App\Http\Controllers\AdminController::class, 'getSupplier']);
+
+
     // Route::post('/create_product', [\App\Http\Controllers\AdminController::class, 'createProduct']);
     // Route::post('/edit_product', [\App\Http\Controllers\AdminController::class, 'editRole']);
     // Route::post('/assign_roles', [\App\Http\Controllers\AdminController::class, 'assignRole']);
@@ -67,7 +69,22 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 Route::get('/logout', [\App\Http\Controllers\AdminController::class, 'logout']);
 
 Route::get('/', [\App\Http\Controllers\AdminController::class, 'index']);
+Route::get('/store',[\App\Http\Controllers\StoreContoller::class, 'index']);
 
+Route::prefix('store')->group(function () {
+   // Route::get('/product',[\App\Http\Controllers\StoreContoller::class, 'index']);
+    //Route::get('/productdetails');
+
+    Route::get('/get_product',[\App\Http\Controllers\StoreContoller::class, 'getProduct']);
+
+    Route::get('/get_productdetails',[\App\Http\Controllers\StoreContoller::class, 'getProductById']);
+
+    Route::get('/get_category',[\App\Http\Controllers\StoreContoller::class, 'getCategory']);
+
+    Route::get('/get_brand',[\App\Http\Controllers\StoreContoller::class, 'getBrand']);
+
+    Route::post('/search_product', [\App\Http\Controllers\StoreContoller::class, 'getProductByBrandAndCategory']);
+});
 
 Route::any('{slug}', [\App\Http\Controllers\AdminController::class, 'index']);
 

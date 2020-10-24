@@ -37,9 +37,10 @@ class AdminController extends Controller
         }
 
 
+       // return true;
         return $this->checkForPermission($user,$request);
 //        return view('notfound');
-//        return view('welcome');
+   //     return view('welcome');
         // return $request->path();
     }
 

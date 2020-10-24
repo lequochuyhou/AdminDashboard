@@ -17,6 +17,8 @@
                 </Button>
                 <Button type="default" size="large" @click="closeModal" >Close</Button>
             </div>
+
+
         </Modal>
     </div>
 </template>
@@ -43,7 +45,7 @@
                     // this.showDeleteModal = false;isDeleted
                     this.$store.commit('SetDeleteModal',true);
                 } else {
-                    
+
                     this.swr();
                     this.$store.commit('SetDeleteModal',false);
                 }

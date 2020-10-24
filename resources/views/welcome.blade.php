@@ -8,6 +8,8 @@
     <title>Admin dashboard</title>
 
     <link rel="stylesheet" href="/css/all.css">
+
+{{--  //  <link rel="stylesheet" href="/css/bootstrap.min.css">--}}
     <!-- Fonts -->
 
 
