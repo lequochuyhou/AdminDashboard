@@ -2,11 +2,28 @@
 
 namespace App\Console;
 
+use Fruitcake\Cors\HandleCors;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
+
+    protected $middleware = [
+        // ...
+        HandleCors::class
+    ];
+
+    protected $middlewareGroups = [
+        'web' => [
+            // ...
+        ],
+
+        'api' => [
+            // ...
+            HandleCors::class,
+        ],
+    ];
     /**
      * The Artisan commands provided by your application.
      *

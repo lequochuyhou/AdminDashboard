@@ -9,8 +9,13 @@ class Role extends Model
 {
     use HasFactory;
 
-    protected $fillable=['roleName','permission'];
+    protected $fillable=['id','roleName','permission','isAdmin'];
 
+    protected $casts=[
+        'id'=>'array',
+        'roleName'=>'array',
+
+    ];
 //    public function role(){
 //        return $this->belongsTo();
 //    }

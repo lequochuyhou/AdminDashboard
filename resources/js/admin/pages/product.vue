@@ -6,14 +6,14 @@
                 <!--~~~~~~~ TABLE ONE ~~~~~~~~~-->
                 <div class="_1adminOverveiw_table_recent _box_shadow _border_radious _mar_b30 _p20">
                     <p class="_title0">Products
-                        <Button @click="addModal=true">
+                        <Button @click="addModal=true" v-if="isWritePermitted">
                             <Icon type="md-add"/>
                          Create new product
                         </Button>
                     </p>
 
                     <div class="_overflow _table_div">
-                        <table class="_table">
+                        <table class="table table-bordered">
                             <!-- TABLE TITLE -->
                             <tr>
                                 <th>ID</th>
@@ -23,7 +23,7 @@
                                 <th>Description</th>
                                 <th>Quantity</th>
                                 <th>Brand</th>
-                                <th>Created at</th>
+
                                 <th>Action</th>
                             </tr>
                             <!-- TABLE TITLE -->
@@ -33,17 +33,16 @@
 
                             <tr v-for="(product,i) in productLists" :key="i" v-if="productLists.length">
                                 <td>{{product.id}}</td>
-                                <td class="table_image"><img :src="`${product.productImage}`"/></td>
-                                <td class="_table_name">{{product.productName}}</td>
-                                <td>{{product.price}} VND</td>
+                                <td class="table_image text-center"><img :src="`${product.productImage}`" /></td>
+                                <td class="text-bold" width="200px">{{product.productName}}</td>
+                                <td class="text-bold">{{product.price}} $</td>
                                 <td>{{product.description}}</td>
                                 <td>{{product.quantity}}</td>
-                                <td>{{}}</td>
+                                <td>{{getBrandName(product)}}</td>
 
-                                <td>{{product.created_at}}</td>
                                 <td>
-                                    <Button type="info" size="small" @click="showEditModal(product,i)">Edit</Button>
-                                    <Button type="error" size="small" @click="showDeletingModal(product,i)"
+                                    <Button v-if="isUpdatePermitted" type="info" size="small" @click="showEditModal(product,i)">Edit</Button>
+                                    <Button v-if="isDeletePermitted" type="error" size="small" @click="showDeletingModal(product,i)"
                                             :loading="product.isDeleting">Delete
                                     </Button>
                                 </td>
@@ -300,7 +299,8 @@
                     description:'',
                     brand_id:null,
                     category_id:null,
-                    supplier_id:null
+                    supplier_id:null,
+                    imageName:''
                 },
                 index: -1,
                 showDeleteModal: false,
@@ -387,22 +387,24 @@
                 }
             },
             async edit() {
-                if (this.editData.categoryName.trim() == '') {
-                    return this.e('Category name is required');
+                if (this.editData.productName.trim() == '') {
+                    return this.e('Product name is required');
                 }
                 if (this.editData.productImage.trim() == '') {
                     return this.e('Image name is required');
                 }
 
-                const res = await this.callApi('post', 'app/edit_category', this.editData);
+
+                const res = await this.callApi('post', 'app/edit_product', this.editData);
                 if (res.status === 200) {
 
-                    this.categoryLists[this.index].categoryName = this.editData.categoryName;
+                    this.productLists[this.index].productName = this.editData.productName;
+                    this.productLists[this.index].productImage = this.editData.productImage;
                     this.s('Product has been updated successfully!');
                     this.editModal = false;
                 } else {
                     if (res.status == 422) {
-                        if (res.data.errors.categoryName) {
+                        if (res.data.errors.productName) {
                             this.e(res.data.errors.categoryName[0]);
                         }
                         if (res.data.errors.productImage) {
@@ -495,7 +497,7 @@
                 if (!isAdd)//for edit image
                 {
                     this.isproductImageNew = true
-                    image = this.data.editData
+                    image = this.editData.productImage
                     this.editData.productImage = ''
                     this.$refs.editDataUploads.clearFiles()
                 } else {
@@ -513,7 +515,13 @@
             closeEditModal() {
                 this.isEditingItem = false
                 this.editModal = false
-            }
+            },
+            getBrandName(product)
+            {
+               // console.log(brand_id)
+                let brandName=this.brands.find(brand=>brand.id==product.brand_id).brandName;
+                return brandName;
+            },
         },
         async created() {
             this.token = window.Laravel.csrfToken;

@@ -25,7 +25,7 @@
                         <table class="_table text-center">
                             <!-- TABLE TITLE -->
                             <tr>
-                                <th>Resource name</th>
+                                <th>Page</th>
                                 <th>Read</th>
                                 <th>Write</th>
                                 <th>Update</th>
@@ -39,16 +39,17 @@
                             <tr v-for="(resource,i) in resources" :key="i">
                                 <td>{{resource.resourceName}}</td>
                                 <td> <Checkbox v-model="resource.read"></Checkbox></td>
-                                <td><Checkbox v-model="resource.write"></Checkbox></td>
-                                <td><Checkbox v-model="resource.update"></Checkbox></td>
-                                <td><Checkbox v-model="resource.delete"></Checkbox></td>
+                                <td><Checkbox v-model="resource.write" @on-change="changeWritePermisson(resource.write,i)"></Checkbox></td>
+                                <td><Checkbox v-model="resource.update" @on-change="changeUpdatePermisson(resource.update,i)"></Checkbox></td>
+                                <td><Checkbox v-model="resource.delete" @on-change="changeDeletePermisson(resource.delete,i)"></Checkbox></td>
                             </tr>
                             <!-- ITEMS -->
-                            <div >
-                                 <Button  class="left" type="primary" :loading="isSending" :disabled="isSending" @click="assignRoles">Assign</Button>
-                            </div>
+
 
                         </table>
+                        <div >
+                            <Button  v-if="isUpdatePermitted" type="primary" :loading="isSending" :disabled="isSending" @click="assignRoles">Assign</Button>
+                        </div>
                     </div>
 
 
@@ -90,7 +91,7 @@
                     {resourceName: 'Admin & Users', read: false, write: false, update: false, delete: false, name: 'adminusers'},
                     {resourceName: 'Role', read: false, write: false, update: false, delete: false, name: 'role'},
                     {resourceName: 'Assign Role', read: false, write: false, update: false, delete: false, name: 'assignRole'},
-
+                    {resourceName: 'Order', read: false, write: false, update: false, delete: false, name: 'order'},
 
 
                 ],
@@ -105,12 +106,14 @@
                     {resourceName: 'Admin & Users', read: false, write: false, update: false, delete: false, name: 'adminusers'},
                     {resourceName: 'Role', read: false, write: false, update: false, delete: false, name: 'role'},
                     {resourceName: 'Assign Role', read: false, write: false, update: false, delete: false, name: 'assignRole'},
+                    {resourceName: 'Order', read: false, write: false, update: false, delete: false, name: 'order'},
                 ],
             };
         },
         methods: {
             async assignRoles(){
                 let data= JSON.stringify(this.resources);
+                //console.log(this.resources)
                 const res=await this.callApi('post','app/assign_roles',{'permission':data,'id':this.data.id});
                 if(res.status==200){
                     this.s('Role has been assigned successfully');
@@ -130,17 +133,50 @@
 
                 let index=this.roles.findIndex(role=>role.id==this.data.id);
                 let permission=this.roles[index].permission;
-                if(permission){
-                    this.resources=JSON.parse(permission);
+                if(!permission){
+
+                    this.resources=this.defaultResources;
+                    console.log(this.resources)
                 }else
                 {
-                    this.resources=this.defaultResources;
+                    this.resources=JSON.parse(permission);
+                    //this.resources.push(this.defaultResources)
                 }
-             //   console.log(permission);
+                //console.log(permission);
+            },
+            changeWritePermisson(check,i){
+                // console.log(check)
+                let readPermission=this.resources[i].read;
+                let writePermission=check;
+                if(writePermission){
+                    if(!readPermission){
+                        this.resources[i].read=true
+                    }
+                }
+            },
+            changeUpdatePermisson(check,i){
+                // console.log(check)
+                let readPermission=this.resources[i].read;
+                let updatePermission=check;
+                if(updatePermission){
+                    if(!readPermission){
+                        this.resources[i].read=true
+                    }
+                }
+            },
+            changeDeletePermisson(check,i){
+                // console.log(check)
+                let readPermission=this.resources[i].read;
+                let deletePermission=check;
+                if(deletePermission){
+                    if(!readPermission){
+                        this.resources[i].read=true
+                    }
+                }
             }
         },
         async created() {
-            console.log(this.$route)
+            //console.log(this.$route.name)
             const res = await this.callApi('get', 'app/get_roles')
             if (res.status == 200) {
                 this.roles = res.data;

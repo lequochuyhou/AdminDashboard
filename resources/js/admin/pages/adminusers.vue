@@ -8,7 +8,7 @@
                 >
                     <p class="_title0">
                         Users
-                        <Button @click="addModal = true">
+                        <Button @click="addModal = true" v-if="isWritePermitted">
                             <Icon type="md-add"/>
                             Create new user
                         </Button>
@@ -37,6 +37,7 @@
                                 <td>{{ user.created_at }}</td>
                                 <td>
                                     <Button
+                                        v-if="checkCreator(user.created_id,isUpdatePermitted)"
                                         type="info"
                                         size="small"
                                         @click="showEditModal(user, i)"
@@ -44,6 +45,7 @@
                                     </Button
                                     >
                                     <Button
+                                        v-if="checkCreator(user.created_id,isDeletePermitted)"
                                         type="error"
                                         size="small"
                                         @click="showDeletingModal(user, i)"
@@ -51,9 +53,16 @@
                                     >Delete
                                     </Button
                                     >
+                                    <Button
+                                        type="default"
+                                        size="small"
+                                        @click="showPermittingModal(user.userType)"
+                                        :loading="user.isDeleting"
+                                    >Permission
+                                    </Button
+                                    >
                                 </td>
                             </tr>
-                            <!-- ITEMS -->
                         </table>
                     </div>
 
@@ -172,6 +181,53 @@
                         </div>
                     </Modal>
 
+                    <!--Permission modal -->
+                    <Modal
+                        v-model="showPermissionModal"
+                        v-bind:title="'Role name:' +' '+userType "
+                        :mask-closable="false"
+                        :closable="false"
+                    >
+
+                        <div v-if="!permissions" class="text-center"><h3>No permissions for this role</h3>
+                        </div>
+                        <div v-if="permissions" class="_overflow _table_div">
+                            <table class="_table text-center">
+                                <!-- TABLE TITLE -->
+                                <tr>
+                                    <th>Page</th>
+                                    <th>Read</th>
+                                    <th>Write</th>
+                                    <th>Update</th>
+                                    <th>Delete</th>
+                                </tr>
+
+                                <tr v-for="(permission,i) in permissions" :key="i" v-if="permissions.length">
+                                    <td>{{permission.resourceName}}</td>
+                                    <td>
+                                        <Checkbox v-model="permission.read"></Checkbox>
+                                    </td>
+                                    <td>
+                                        <Checkbox v-model="permission.write"></Checkbox>
+                                    </td>
+                                    <td>
+                                        <Checkbox v-model="permission.update"></Checkbox>
+                                    </td>
+                                    <td>
+                                        <Checkbox v-model="permission.delete"></Checkbox>
+                                    </td>
+                                </tr>
+
+
+                            </table>
+                        </div>
+
+
+                        <div slot="footer">
+                            <Button type="default" @click="showPermissionModal = false">Close</Button>
+                        </div>
+                    </Modal>
+
                     <!--Delete alert modal -->
                     <!--                    <Modal v-model="showDeleteModal" width="360">-->
                     <!--                        <p slot="header" style="color:#f60;text-align:center">-->
@@ -195,11 +251,14 @@
 </template>
 
 <script>
+
     import deleteModal from "../components/deleteModal.vue";
     import {mapGetters} from "vuex";
     import role from "./role";
 
+
     export default {
+        props: ['user'],
         data() {
             return {
                 data: {
@@ -208,7 +267,7 @@
                     password: "",
                     userType: "",
                     role_id: null,
-                    created_id:null
+                    created_id: null
                 },
                 addModal: false,
                 editModal: false,
@@ -219,15 +278,19 @@
                     email: "",
                     password: "",
                     userType: "",
-                    role_id:null,
-                    created_id:null
+                    role_id: null,
+                    created_id: null
                 },
                 index: -1,
                 showDeleteModal: false,
                 isDeleting: false,
                 deleteItem: {},
                 deletingIndex: -1,
-                roles: []
+                roles: [],
+                showPermissionModal: false,
+                userType: null,
+                permissions: []
+
             };
         },
         methods: {
@@ -245,8 +308,7 @@
                     return this.e("Role id is required");
                 }
 
-                this.data.userType=this.roles.find(role=>role.id==this.data.role_id).roleName;
-
+                this.data.userType = this.roles.find(role => role.id == this.data.role_id).roleName;
 
 
                 if (this.data.userType.trim() == "") {
@@ -286,7 +348,7 @@
                     return this.e("Role id is required");
                 }
 
-                this.editData.userType=this.roles.find(role=>role.id==this.editData.role_id).roleName;
+                this.editData.userType = this.roles.find(role => role.id == this.editData.role_id).roleName;
                 const res = await this.callApi("post", "app/edit_user", this.editData);
 
                 if (res.status === 200) {
@@ -310,7 +372,7 @@
                     fullName: user.fullName,
                     email: user.email,
                     userType: user.userType,
-                    role_id:user.role_id
+                    role_id: user.role_id
                 };
                 this.editData = obj;
                 this.editModal = true;
@@ -331,6 +393,24 @@
                 // this.deletingIndex=i
                 // this.showDeleteModal=true
             },
+            showPermittingModal(userType) {
+                this.userType = userType;
+                this.showPermissionModal = true;
+
+                let index = this.roles.findIndex(role => role.roleName == userType);
+                //console.log(index)
+                let data = this.roles[index].permission;
+                this.permissions = JSON.parse(data);
+            },
+            checkCreator(created_id,check) {
+                let user_id = this.user.id
+                if (user_id==created_id) {
+                    if(!check) {
+                        return true;
+                    }
+                }
+                return check;
+            }
         },
         async created() {
             const [res, resRole] = await Promise.all([
@@ -346,6 +426,10 @@
 
             if (resRole.status == 200) {
                 this.roles = resRole.data
+                if (resRole.data[0].permission) {
+                    this.permissions = JSON.parse(resRole.data[0].permission);
+                    //  console.log(this.permissions)
+                }
             } else {
                 this.swr();
             }

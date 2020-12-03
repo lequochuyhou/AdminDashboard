@@ -19,10 +19,26 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.1",
+        "basic-vue-chat": "^0.3.5",
+        "bootstrap": "^4.5.3",
+        "bootstrap-vue": "^2.19.0",
+        "ioredis": "^4.19.2",
+        "laravel": "0.0.1",
+        "laravel-echo": "^1.9.0",
+        "mdbvue": "^6.7.1",
+        "moment": "^2.29.1",
+        "pusher-js": "^7.0.1",
+        "socket.io": "^3.0.0",
+        "socket.io-client": "^3.0.1",
         "view-design": "^4.4.0-rc.1",
         "vue": "^2.6.12",
+        "vue-beautiful-chat": "^2.5.0",
         "vue-editor-js": "^2.0.1",
+        "vue-notification-bell": "^0.8.14",
+        "vue-quick-chat": "^1.2.6",
         "vue-router": "^3.4.6",
+        "vuejs-paginate": "^2.1.0",
+        "vuesax": "^3.12.2",
         "vuex": "^3.5.1"
     }
 }

@@ -13,7 +13,7 @@
             </div>
             <div slot="footer">
                 <Button type="error" size="large"  :loading="isDeleting" :disabled="isDeleting"
-                        @click="deleteTag">Delete
+                        @click="deleteObj">Delete
                 </Button>
                 <Button type="default" size="large" @click="closeModal" >Close</Button>
             </div>
@@ -35,13 +35,15 @@
            ...mapGetters(['getDeleteModalObj'])
        },
         methods:{
-            async deleteTag() {
+            async deleteObj() {
                 this.isDeleting = true
-                this.$store.commit('SetDeleteModal');
+                //this.$store.commit('SetDeleteModal');
                 // this.isDeleting = true
-                const res = await this.callApi('post',this.getDeleteModalObj.deleteUrl,this.getDeleteModalObj.data);
+                // console.log(this.getDeleteModalObj.deleteUrl)
+                // console.log(this.getDeleteModalObj.data)
+               const res = await this.callApi('post',this.getDeleteModalObj.deleteUrl,this.getDeleteModalObj.data);
                 if (res.status === 200) {
-                    this.s('Tag has been delete it successfully!');
+                    this.s('Object has been delete it successfully!');
                     // this.showDeleteModal = false;isDeleted
                     this.$store.commit('SetDeleteModal',true);
                 } else {

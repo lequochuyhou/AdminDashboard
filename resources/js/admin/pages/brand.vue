@@ -6,48 +6,43 @@
                 <!--~~~~~~~ TABLE ONE ~~~~~~~~~-->
                 <div class="_1adminOverveiw_table_recent _box_shadow _border_radious _mar_b30 _p20">
                     <p class="_title0">Products
-                        <Button @click="addModal=true">
+                        <Button v-if="isWritePermitted" @click="addModal=true">
                             <Icon type="md-add"/>
-                            Create new product
+                            Add new brand
                         </Button>
                     </p>
 
                     <div class="_overflow _table_div">
-                        <table class="_table">
+                        <table class="table table-bordered text-center">
                             <!-- TABLE TITLE -->
+                            <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Product image</th>
-                                <th>Product name</th>
-                                <th>Price</th>
+                                <th>Brand logo</th>
+                                <th>Brand name</th>
                                 <th>Description</th>
-                                <th>Quantity</th>
-                                <th>Brand</th>
-                                <th>Created at</th>
                                 <th>Action</th>
                             </tr>
+                            </thead>
                             <!-- TABLE TITLE -->
 
 
                             <!-- ITEMS -->
+                            <tbody>
+                            <tr v-for="(brand,i) in brandLists" :key="i" v-if="brandLists.length">
+                                <td>{{brand.id}}</td>
+                                <td class="table_image"><img :src="`${brand.brandLogo}`"/></td>
+                                <td class="text-bold">{{brand.brandName}}</td>
+                                <td>{{brand.description}}</td>
 
-                            <tr v-for="(product,i) in productLists" :key="i" v-if="productLists.length">
-                                <td>{{product.id}}</td>
-                                <td class="table_image"><img :src="`${product.productImage}`"/></td>
-                                <td class="_table_name">{{product.productName}}</td>
-                                <td>{{product.price}} VND</td>
-                                <td>{{product.description}}</td>
-                                <td>{{product.quantity}}</td>
-                                <td>{{}}</td>
-
-                                <td>{{product.created_at}}</td>
                                 <td>
-                                    <Button type="info" size="small" @click="showEditModal(product,i)">Edit</Button>
-                                    <Button type="error" size="small" @click="showDeletingModal(product,i)"
-                                            :loading="product.isDeleting">Delete
+                                    <Button v-if="isUpdatePermitted" type="info" size="small" @click="showEditModal(brand,i)">Edit</Button>
+                                    <Button v-if="isDeletePermitted" type="error" size="small" @click="showDeletingModal(brand,i)"
+                                            :loading="brand.isDeleting">Delete
                                     </Button>
                                 </td>
                             </tr>
+                            </tbody>
                             <!-- ITEMS -->
 
 
@@ -63,65 +58,14 @@
                     >
 
                         <div class="space">
-                            <Input v-model="data.productName" size="large" placeholder="Product name"/>
+                            <Input v-model="data.brandName" size="large" placeholder="Product name"/>
                         </div>
 
                         <div class="space">
-                            <!--                           // <Input v-model="data.productName" size="large" placeholder="Product name"/>-->
-                            <textarea v-model="data.description" style="width:100%" placeholder="Product description"></textarea>
-
-                        </div>
-
-                        <div class="space">
-                            <Input v-model="data.price" size="large" placeholder="Price"/>
-                        </div>
-
-                        <div class="space">
-                            <Input v-model="data.quantity" size="large" placeholder="Quantity in stock"/>
+                            <textarea v-model="data.description" style="width: 500px;height: 150px" size="large" placeholder="Description"/>
                         </div>
 
 
-                        <div class="space">
-                            <label>Brands:</label>
-                            <Select
-                                v-model="data.brand_id"
-                                placeholder="Select brand"
-                                style="width: 200px"
-                            >
-                                <Option :value="brand.id" v-for="(brand,i) in brands" :key="i" v-if="brands.length">
-                                    {{brand.brandName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
-
-                        <div class="space">
-                            <label>Categories:</label>
-                            <Select
-                                v-model="data.category_id"
-                                placeholder="Select category"
-                                style="width: 200px"
-                            >
-                                <Option :value="category.id" v-for="(category,i) in categories" :key="i" v-if="categories.length">
-                                    {{category.categoryName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
-
-                        <div class="space">
-                            <label>Suppliers:</label>
-                            <Select
-                                v-model="data.supplier_id"
-                                placeholder="Select supply "
-                                style="width: 200px"
-                            >
-                                <Option :value="supplier.id" v-for="(supplier,i) in suppliers" :key="i" v-if="suppliers.length">
-                                    {{supplier.supplierName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
                         <div class="space">
                             <Upload
                                 ref="uploads"
@@ -141,8 +85,8 @@
                                     <p>Click or drag files here to upload</p>
                                 </div>
                             </Upload>
-                            <div class="demo-upload-list" v-if="data.productImage">
-                                <img :src="`${data.productImage}`"/>
+                            <div class="demo-upload-list" v-if="data.brandLogo">
+                                <img :src="`${data.brandLogo}`"/>
                                 <div class="demo-upload-list-cover">
                                     <Icon type="ios-trash-outline" @click="deleteImage"></Icon>
                                 </div>
@@ -151,7 +95,7 @@
                         </div>
                         <div slot="footer">
                             <Button type="primary" @click="add" :disabled="isAdding" :loading="isAdding">
-                                {{isAdding?'Adding..':'Create product'}}
+                                {{isAdding?'Adding..':'Add brand'}}
                             </Button>
                             <Button type="default" @click="addModal=false">Close</Button>
                         </div>
@@ -171,7 +115,8 @@
 
                         <div class="space">
                             <!--                           // <Input v-model="data.productName" size="large" placeholder="Product name"/>-->
-                            <textarea v-model="editData.description" style="width:100%" placeholder="Product description"></textarea>
+                            <textarea v-model="editData.description" style="width:100%"
+                                      placeholder="Product description"></textarea>
 
                         </div>
 
@@ -183,48 +128,6 @@
                             <Input v-model="editData.quantity" size="large" placeholder="Quantity in stock"/>
                         </div>
 
-
-                        <div class="space">
-                            <label>Brands:</label>
-                            <Select
-                                v-model="editData.brand_id"
-                                placeholder="Select brand"
-                                style="width: 200px"
-                            >
-                                <Option :value="brand.id" v-for="(brand,i) in brands" :key="i" v-if="brands.length">
-                                    {{brand.brandName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
-
-                        <div class="space">
-                            <label>Categories:</label>
-                            <Select
-                                v-model="editData.category_id"
-                                placeholder="Select category"
-                                style="width: 200px"
-                            >
-                                <Option :value="category.id" v-for="(category,i) in categories" :key="i" v-if="categories.length">
-                                    {{category.categoryName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
-
-                        <div class="space">
-                            <label>Suppliers:</label>
-                            <Select
-                                v-model="editData.supplier_id"
-                                placeholder="Select supply "
-                                style="width: 200px"
-                            >
-                                <Option :value="supplier.id" v-for="(supplier,i) in suppliers" :key="i" v-if="suppliers.length">
-                                    {{supplier.supplierName}}
-                                </Option>
-                                <!--                <Option value="Editor">Editor</Option>-->
-                            </Select>
-                        </div>
                         <div class="space">
                             <Upload v-show="isproductImageNew"
                                     ref="editDataUploads"
@@ -255,7 +158,7 @@
                         </div>
                         <div slot="footer">
                             <Button type="primary" @click="edit" :disabled="isAdding" :loading="isAdding">
-                                {{isAdding?'Editing..':'Edit category'}}
+                                {{isAdding?'Editing..':'Edit brand'}}
                             </Button>
                             <Button type="default" @click="closeEditModal">Close</Button>
                         </div>
@@ -278,29 +181,19 @@
         data() {
             return {
                 data: {
-                    productImage: '',
-                    productName: '',
-                    price:'',
-                    quantity:'',
-                    description:'',
-                    brand_id:null,
-                    category_id:null,
-                    supplier_id:null
+                    brandLogo: '',
+                    brandName: '',
+                    description:''
 
                 },
                 addModal: false,
                 editModal: false,
                 isAdding: false,
-                productLists: [],
+                brandLists: [],
                 editData: {
-                    productImage: '',
-                    productName: '',
-                    price:'',
-                    quantity:'',
-                    description:'',
-                    brand_id:null,
-                    category_id:null,
-                    supplier_id:null
+                    brandLogo: '',
+                    brandName: '',
+                    description:''
                 },
                 index: -1,
                 showDeleteModal: false,
@@ -310,76 +203,41 @@
                 token: '',
                 isproductImageNew: false,
                 isEditingItem: false,
-                brands:[],
-                categories:[],
-                suppliers:[]
             }
         },
         methods: {
             async add() {
-                if (this.data.productName.trim() == '') {
-                    return this.e('Product name is required');
+                if (this.data.brandLogo.trim() == '') {
+                    return this.e('Brand logo is required');
                 }
-                if (this.data.productImage.trim() == '') {
-                    return this.e('Product image is required');
-                }
-
-                if (this.data.price.trim() == '') {
-                    return this.e('Product price is required');
+                if (this.data.brandName.trim() == '') {
+                    return this.e('Brand name is required');
                 }
 
-                if (this.data.quantity.trim() == '') {
-                    return this.e('Product quantity is required');
-                }
-
-                if (this.data.description.trim() == '') {
-                    return this.e('Product quantity is required');
-                }
-
-                // if (!this.data.brand_id) {
-                //     return this.e('Image name is required');
-                // }
-                //
-                // if (!this.data.category_id) {
-                //     return this.e('Image name is required');
-                // }
-                //
-                // if (!this.data.supplier_id) {
-                //     return this.e('Image name is required');
+                // if (this.data.description.trim() == '') {
+                //     return this.e('Product price is required');
                 // }
 
-                this.data.productImage=`${this.data.productImage}`
-                const res = await this.callApi('post', 'app/create_product', this.data);
+
+                this.data.brandLogo = `${this.data.brandLogo}`
+                const res = await this.callApi('post', 'app/create_brand', this.data);
                 if (res.status === 201) {
-                    this.productLists.unshift(res.data);
-                    this.s('Category has been added successfully!');
+                    this.brandLists.unshift(res.data);
+                    this.s('Brand has been added successfully!');
                     this.addModal = false;
-                    this.data.productImage = ''
+                    this.data.brandLogo = ''
+                    this.data.brandName = ''
                     this.data.description = ''
-                    this.data.productName = ''
-                    this.data.price=null
-                    this.data.quantity=null
 
                 } else {
                     if (res.status == 422) {
-                        if (res.data.errors.productName) {
+                        if (res.data.errors.brandName) {
                             this.e(res.data.errors.productName[0]);
                         }
-                        if (res.data.errors.productImage) {
+                        if (res.data.errors.brandLogo) {
                             this.e(res.data.errors.productImage[0]);
                         }
 
-                        if (res.data.errors.price) {
-                            this.e(res.data.errors.price[0]);
-                        }
-
-                        if (res.data.errors.quantity) {
-                            this.e(res.data.errors.quantity[0]);
-                        }
-
-                        // if (res.data.errors.productImage) {
-                        //     this.e(res.data.errors.productImage[0]);
-                        // }
                     } else {
                         this.swr();
                     }
@@ -394,18 +252,18 @@
                     return this.e('Image name is required');
                 }
 
-                const res = await this.callApi('post', 'app/edit_category', this.editData);
+                const res = await this.callApi('post', 'app/edit_brand', this.editData);
                 if (res.status === 200) {
 
-                    this.categoryLists[this.index].categoryName = this.editData.categoryName;
-                    this.s('Product has been updated successfully!');
+                    this.brandLists[this.index].brandName = this.editData.brandName;
+                    this.s('Brand has been updated successfully!');
                     this.editModal = false;
                 } else {
                     if (res.status == 422) {
-                        if (res.data.errors.categoryName) {
+                        if (res.data.errors.brandName) {
                             this.e(res.data.errors.categoryName[0]);
                         }
-                        if (res.data.errors.productImage) {
+                        if (res.data.errors.brandLogo) {
                             this.e(res.data.errors.productImage[0]);
                         }
                     } else {
@@ -414,17 +272,11 @@
 
                 }
             },
-            showEditModal(product, index) {
+            showEditModal(brand, index) {
                 let obj = {
-                    id: product.id,
-                    productName: product.productName,
-                    productImage: product.productImage,
-                    price: product.price,
-                    quantity: product.quantity,
-                    description: product.description,
-                    brand_id: product.brand_id,
-                    category_id: product.category_id,
-                    supplier_id: product.supplier_id,
+                  id:brand.id,
+                  brandName:brand.brandName,
+                  brandLogo:brand.brandLogo
                 }
 
                 this.editData = obj
@@ -436,7 +288,7 @@
 
                 const deleteModalObj = {
                     showDeleteModal: true,
-                    deleteUrl:'app/delete_category',
+                    deleteUrl: 'app/delete_brand',
                     data: category,
                     deletingIndex: i,
                     isDeleted: false
@@ -444,7 +296,7 @@
                 }
                 //console.log(deleteModalObj);
 
-                this.$store.commit('setDeletingModalObj',deleteModalObj);
+                this.$store.commit('setDeletingModalObj', deleteModalObj);
                 // this.deleteItem = tag;
                 // this.deletingIndex = i
                 // this.showDeleteModal = true
@@ -452,15 +304,12 @@
             handleSuccess(res, file) {
                 res = `/uploads/${res}`;
                 if (this.isEditingItem) {
-                    console.log('inside');
-                    return this.editData.productImage = res
+                   // console.log('inside');
+                    return this.editData.brandLogo = res
                 }
 
-                this.data.productImage = res
+                this.data.brandLogo = res
 
-                // console.log(this.data.productImage)
-                // file.url = 'https://o5wwk8baw.qnssl.com/7eb99afb9d5f317c912f08b5212fd69a/avatar';
-                // file.name = '7eb99afb9d5f317c912f08b5212fd69a';
             },
             handleFormatError(file) {
                 this.$Notice.warning({
@@ -517,42 +366,23 @@
         },
         async created() {
             this.token = window.Laravel.csrfToken;
-            //      const res = await this.callApi('get', 'app/get_product');
-            const [res,resBrand,resCat,resSuppier]=await Promise.all([
-                this.callApi('get', 'app/get_product'),
-                this.callApi('get', 'app/get_brand'),
-                this.callApi('get', 'app/get_category'),
-                this.callApi('get', 'app/get_supplier')
-            ]);
+             const res = await this.callApi('get', 'app/get_brand');
+
             if (res.status == 200) {
-                this.productLists = res.data
+                this.brandLists = res.data
             } else {
                 this.swr();
             }
-            if (resBrand.status == 200) {
-                this.brands = resBrand.data
-            } else {
-                this.swr();
-            }
-            if (resCat.status == 200) {
-                this.categories = resCat.data
-            } else {
-                this.swr();
-            }
-            if (resSuppier.status == 200) {
-                this.suppliers = resSuppier.data
-            } else {
-                this.swr();
-            }
+
         },
         components: {
             deleteModal
         },
         watch: {
-            getDeleteModalObj(obj){
+            getDeleteModalObj(obj) {
                 console.log(obj);
-                if(obj.isDeleted){
-                    this.productLists.splice(obj.deletingIndex,1);
+                if (obj.isDeleted) {
+                    this.productLists.splice(obj.deletingIndex, 1);
                 }
             }
         },

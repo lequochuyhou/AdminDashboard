@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+//Route::post('/create_user', [\App\Http\Controllers\AdminController::class, 'createUser']);
 Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 
     //Tag
@@ -32,6 +32,7 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 
     //User
     Route::get('/get_users', [\App\Http\Controllers\AdminController::class, 'getUser']);
+    Route::get('/get_allusers', [\App\Http\Controllers\AdminController::class, 'getAllUsers']);
     Route::post('/create_user', [\App\Http\Controllers\AdminController::class, 'createUser']);
     Route::post('/edit_user', [\App\Http\Controllers\AdminController::class, 'editUser']);
     Route::post('/admin_login', [\App\Http\Controllers\AdminController::class, 'adminLogin']);
@@ -46,19 +47,24 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
     //Product
     Route::get('/get_product', [\App\Http\Controllers\AdminController::class, 'getProduct']);
     Route::post('/create_product', [\App\Http\Controllers\AdminController::class, 'createProduct']);
-    // Route::post('/edit_product', [\App\Http\Controllers\AdminController::class, 'editRole']);
+     Route::post('/edit_product', [\App\Http\Controllers\AdminController::class, 'editProduct']);
     // Route::post('/assign_roles', [\App\Http\Controllers\AdminController::class, 'assignRole']);
 
     //Brand
     Route::get('/get_brand', [\App\Http\Controllers\AdminController::class, 'getBrand']);
-    Route::post('/create_product', [\App\Http\Controllers\AdminController::class, 'createProduct']);
-    Route::post('/edit_product', [\App\Http\Controllers\AdminController::class, 'editProduct']);
+    Route::post('/create_brand', [\App\Http\Controllers\AdminController::class, 'createBrand']);
+    Route::post('/edit_brand', [\App\Http\Controllers\AdminController::class, 'editProduct']);
+
     // Route::post('/assign_roles', [\App\Http\Controllers\AdminController::class, 'assignRole']);
 
     //Supplier
     Route::get('/get_supplier', [\App\Http\Controllers\AdminController::class, 'getSupplier']);
 
+    Route::get('/get_notification', [\App\Http\Controllers\AdminController::class, 'getNotification']);
 
+    //Order
+    Route::get('/get_order', [\App\Http\Controllers\AdminController::class, 'getOrder']);
+    Route::post('/get_orderdetails',[\App\Http\Controllers\AdminController::class, 'getOrderById']);
     // Route::post('/create_product', [\App\Http\Controllers\AdminController::class, 'createProduct']);
     // Route::post('/edit_product', [\App\Http\Controllers\AdminController::class, 'editRole']);
     // Route::post('/assign_roles', [\App\Http\Controllers\AdminController::class, 'assignRole']);
@@ -69,31 +75,48 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 Route::get('/logout', [\App\Http\Controllers\AdminController::class, 'logout']);
 
 Route::get('/', [\App\Http\Controllers\AdminController::class, 'index']);
-Route::get('/store',[\App\Http\Controllers\StoreContoller::class, 'index']);
+Route::get('/store/',[\App\Http\Controllers\StoreContoller::class, 'index']);
+
+//Route::view('/store','storeWelcome');
+
 
 Route::prefix('store')->group(function () {
    // Route::get('/product',[\App\Http\Controllers\StoreContoller::class, 'index']);
     //Route::get('/productdetails');
 
+    //Authentication
+    Route::post('/login',[\App\Http\Controllers\StoreContoller::class, 'login']);
+    Route::get('/logout',[\App\Http\Controllers\StoreContoller::class, 'logout']);
+    Route::post('/register', [\App\Http\Controllers\StoreContoller::class, 'register']);
+
+
+    //Product
     Route::get('/get_product',[\App\Http\Controllers\StoreContoller::class, 'getProduct']);
-
     Route::get('/get_productdetails',[\App\Http\Controllers\StoreContoller::class, 'getProductById']);
-
     Route::get('/get_category',[\App\Http\Controllers\StoreContoller::class, 'getCategory']);
-
     Route::get('/get_brand',[\App\Http\Controllers\StoreContoller::class, 'getBrand']);
-
     Route::post('/search_product', [\App\Http\Controllers\StoreContoller::class, 'getProductByBrandAndCategory']);
+    //Order
+    Route::post('/get_order',[\App\Http\Controllers\StoreContoller::class, 'getOrder']);
+    Route::post('/get_orderdetails',[\App\Http\Controllers\StoreContoller::class, 'getOrderById']);
+    Route::post('/create_order', [\App\Http\Controllers\StoreContoller::class, 'createOrder']);
+
+    //Conversation
+    Route::get('/messages',[\App\Http\Controllers\StoreContoller::class, 'getMessages']);
+    Route::post('/sendmessage',[\App\Http\Controllers\StoreContoller::class, 'sendMessage']);
+
+   //Notification
+    Route::get('/get_notifications',[\App\Http\Controllers\StoreContoller::class, 'getNotifications']);
+
+
+    //Cart
+    Route::post('/get_shoppingcart',[\App\Http\Controllers\StoreContoller::class, 'getShoppingCartById']);
+    Route::post('/get_cartitems',[\App\Http\Controllers\StoreContoller::class, 'getCartItemsByShoppingCartId']);
+    Route::post('/add_cartitem',[\App\Http\Controllers\StoreContoller::class, 'addCartItem']);
+    Route::post('/update_cartitem_quantity',[\App\Http\Controllers\StoreContoller::class, 'updateCartItemQuantity']);
+    Route::post('/delete_cartitem',[\App\Http\Controllers\StoreContoller::class, 'deleteCartItem']);
 });
 
 Route::any('{slug}', [\App\Http\Controllers\AdminController::class, 'index']);
 
-// Route::get('/testpage', function () {
-//     return view('welcome');
-// });
 
-// Route::get('/new',[\App\Http\Controllers\TestController::class,'controllerMethod']);
-
-// Route::any('{slug}',function (){
-//     return view('welcome');
-// });

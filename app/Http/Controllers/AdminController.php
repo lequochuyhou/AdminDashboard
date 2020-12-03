@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Notification;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Supplier;
@@ -37,32 +39,38 @@ class AdminController extends Controller
         }
 
 
-       // return true;
-        return $this->checkForPermission($user,$request);
-//        return view('notfound');
-   //     return view('welcome');
+        return $this->checkForPermission($user, $request);
+
+     //        return view('welcome');
         // return $request->path();
     }
 
-    public function checkForPermission($user,  $request)
+    public function checkForPermission($user, $request)
     {
 
         $permissions = json_decode($user->role->permission);
         $hasPermisson = false;
+        $routeName='';
         foreach ($permissions as $permission) {
+//            @dd($permission);
             if ($permission->name == $request->path()) {
+
                 if ($permission->read) {
                     $hasPermisson = true;
-              }
+                    $routeName=$permission->name;
+                }
             }
         }
+
+       // @dd("/".$routeName);
         if ($hasPermisson) {
             return view('welcome');
+            //return redirect("/$routeName");
         } else {
             return view('notfound');
         }
 
-      //  echo $permissions[0]->name;
+        //  echo $permissions[0]->name;
     }
 
     public function logout()
@@ -123,7 +131,7 @@ class AdminController extends Controller
 
     public function getCategory()
     {
-        return Category::orderBy('id', 'desc')->get();
+        return Category::orderBy('id', 'asc')->get();
     }
 
 
@@ -147,6 +155,7 @@ class AdminController extends Controller
 
     public function deleteFileFromServer($fileName, $hasFullPath = false)
     {
+        $filepath = null;
         if ($hasFullPath) {
             $filepath = public_path() . $fileName;
         }
@@ -161,12 +170,15 @@ class AdminController extends Controller
     {
         $this->validate($request, [
             'categoryName' => 'required',
-            'iconImage' => 'required',
+            'description' => 'required',
+            //'iconImage' => 'required',
         ]);
 
         return Category::create([
             'categoryName' => $request->categoryName,
-            'iconImage' => $request->iconImage
+            //'iconImage' => $request->iconImage
+            'description' => $request->description,
+
         ]);
     }
 
@@ -174,19 +186,21 @@ class AdminController extends Controller
     {
         $this->validate($request, [
             'categoryName' => 'required',
-            'iconImage' => 'required',
+            'description' => 'required',
+            //  'iconImage' => 'required',
         ]);
 
         return Category::where('id', $request->id)->update([
             'categoryName' => $request->categoryName,
-            'iconImage' => $request->iconImage
+            'description' => $request->description,
+            //'iconImage' => $request->iconImage
         ]);
     }
 
     public function deleteCategory(Request $request)
     {
         //first delete the original file from server
-        $this->deleteFileFromServer($request->iconImage);
+        //$this->deleteFileFromServer($request->iconImage);
         $this->validate($request, [
             'id' => 'required',
 
@@ -199,17 +213,14 @@ class AdminController extends Controller
     public function getUser()
     {
         # code...
-        $user=Auth::user();
-      //  return $user->role->roleName;
-        if($user->userType =='Manager')
-        {
-           // $user = User::where('id', $request->id)->update($data);
-        //    return "Hello";
-          // return $user->id;
-            return User::where('created_id',$user->id)->get();
-        }
-        else
-        {
+        $user = Auth::user();
+        //  return $user->role->roleName;
+        if ($user->userType == 'Manager') {
+            // $user = User::where('id', $request->id)->update($data);
+            //    return "Hello";
+            // return $user->id;
+            return User::where('created_id', $user->id)->get();
+        } else {
             return User::get();
         }
 
@@ -222,21 +233,22 @@ class AdminController extends Controller
             'fullName' => 'required|min:6',
             'email' => 'bail|required|email|unique:users',
             'password' => 'bail|required|min:6',
-            'userType'=>'required',
+            'userType' => 'required',
             'role_id' => 'required',
         ]);
 
 
         $password = bcrypt($request->password);
 
-        $created_id=Auth::user()->id;
+
+        $created_id = Auth::user()->id;
         $user = User::create([
             'fullName' => $request->fullName,
             'email' => $request->email,
             'password' => $password,
-            'userType'=>$request->userType,
+            'userType' => $request->userType,
             'role_id' => $request->role_id,
-            'created_id'=>$created_id
+            'created_id' => $created_id
         ]);
 
         return $user;
@@ -249,14 +261,14 @@ class AdminController extends Controller
             'fullName' => 'required',
             'email' => "bail|required|email|unique:users,email,$request->id",
             'password' => 'min:6',
-            'userType'=>'required',
+            'userType' => 'required',
             'role_id' => 'required',
         ]);
 
         $data = [
             'fullName' => $request->fullName,
             'email' => $request->email,
-            'userType'=>$request->userType,
+            'userType' => $request->userType,
             'role_id' => $request->role_id,
 
         ];
@@ -298,6 +310,7 @@ class AdminController extends Controller
                     'user' => $user
                 ]);
             }
+          // return redirect('/');
         } else {
             return response()->json([
                 'msg' => 'Logged in failed'
@@ -321,7 +334,8 @@ class AdminController extends Controller
         ]);
 
         return Role::create([
-            'roleName' => $request->roleName
+            'roleName' => $request->roleName,
+            'isAdmin'=>$request->isAdmin
         ]);
 
 
@@ -331,11 +345,12 @@ class AdminController extends Controller
     {
         //validate request
         $this->validate($request, [
-            'roleName' => 'required'
+            'roleName' => 'required',
         ]);
 
         return Role::where('id', $request->id)->update([
-            'roleName' => $request->roleName
+            'roleName' => $request->roleName,
+            'isAdmin'=>$request->isAdmin
         ]);
 
 
@@ -345,73 +360,121 @@ class AdminController extends Controller
     {
         $this->validate($request, [
             'permission' => 'required',
-            'id' => 'required'
+            'id' => 'required',
+
         ]);
 
         return Role::where('id', $request->id)->update([
-            'permission' => $request->permission
+            'permission' => $request->permission,
+
         ]);
     }
 
-    public  function  getProduct(){
+    public function getProduct()
+    {
         return Product::all();
     }
 
-    public  function  createProduct(Request $request){
-        $this->validate($request,[
-            'productName'=>'required',
-            'productImage'=>'required',
-            'price'=>'required',
-            'quantity'=>'required',
-            'description'=>'required',
-//            'brand_id'=>'required',
-//            'category_id'=>'required',
-//            'supplier_id'=>'required'
+    public function createProduct(Request $request)
+    {
+        $this->validate($request, [
+            'productName' => 'required',
+            'productImage' => 'required',
+            'price' => 'required',
+            'quantity' => 'required',
+            'description' => 'required',
+            'brand_id' => 'required',
+            'category_id' => 'required',
+            'supplier_id' => 'required'
         ]);
 
         return Product::create([
-            'productName'=>$request->productName,
-            'productImage'=>$request->productImage,
-            'price'=>$request->price,
-            'quantity'=>$request->quantity,
-            'description'=>$request->description,
-//            'brand_id'=>$request->productName,
-            'category_id'=>'1',
-//            'supplier_id'=>$request->productName,
+            'productName' => $request->productName,
+            'productImage' => $request->productImage,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'description' => $request->description,
+            'brand_id' => $request->brand_id,
+            'category_id' => $request->category_id,
+            'supplier_id' => $request->supplier_id,
 
         ]);
     }
 
-    public  function  editProduct(Request $request){
-        $this->validate($request,[
-            'productName'=>'required',
-            'productImage'=>'required',
-            'price'=>'required',
-            'quantity'=>'required',
-            'description'=>'required',
-            'brand_id'=>'required',
-            'category_id'=>'required',
-            'supplier_id'=>'required'
+    public function editProduct(Request $request)
+    {
+        $this->validate($request, [
+            'productName' => 'required',
+            'productImage' => 'required',
+            'price' => 'required',
+            'quantity' => 'required',
+            'description' => 'required',
+            'brand_id' => 'required',
+            'category_id' => 'required',
+            'supplier_id' => 'required'
         ]);
 
-        return Product::where('id',$request->id)->update([
-            'productName'=>$request->productName,
-            'productImage'=>$request->productImage,
-            'price'=>$request->price,
-            'quantity'=>$request->quantity,
-            'description'=>$request->description,
-            'brand_id'=>$request->brand_id,
-            'category_id'=>$request->category_id,
-            'supplier_id'=>$request->supplier_id,
+        return Product::where('id', $request->id)->update([
+            'productName' => $request->productName,
+            'productImage' => $request->productImage,
+            'price' => $request->price,
+            'quantity' => $request->quantity,
+            'description' => $request->description,
+            'brand_id' => $request->brand_id,
+            'category_id' => $request->category_id,
+            'supplier_id' => $request->supplier_id,
 
         ]);
     }
 
-    public function getSupplier(){
+    public function getSupplier()
+    {
         return Supplier::all();
     }
 
-    public function getBrand(){
+    public function getBrand()
+    {
         return Brand::all();
+    }
+
+    public function createBrand(Request $request)
+    {
+
+        $this->validate($request, [
+            'brandLogo' => 'required',
+            'brandName' => 'required',
+        ]);
+
+//        if()
+//        {
+//
+//        }
+
+        return Brand::create([
+            'brandLogo' => $request->brandLogo,
+            'brandName' => $request->brandName
+        ]);
+    }
+
+    public function getOrder(){
+         return Order::all();
+    }
+
+    public function getNotification(){
+        return Notification::all();
+    }
+
+    public  function getAllUsers(){
+        return User::all();
+    }
+
+    public  function  getOrderById(Request $request){
+        $this->validate($request,[
+            'order_id'=>'required'
+        ]);
+
+
+        return Order::where('id',$request->order_id)->get();
+       // return Order::find($request->order_id);
     }
 }

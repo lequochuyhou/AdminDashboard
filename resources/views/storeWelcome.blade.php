@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
-<head>
+<meta>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <meta name="csrf-token" content="{{csrf_token()}}">
     <title>CAR DEALER</title>
 
-{{--   // <link rel="stylesheet" href="/css/all.css">--}}
+
+{{--   // <link rel="stylesheet" href="{{asset('css/all.css')}}">--}}
     <link rel="stylesheet" href="/css/bootstrap.min.css">
-    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="/css/fontAwesome.css">
+{{--    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">--}}
+{{--    <link rel="stylesheet" href="/css/fontAwesome.css">--}}
     <link rel="stylesheet" href="/css/hero-slider.css">
     <link rel="stylesheet" href="/css/owl-carousel.css">
     <link rel="stylesheet" href="/css/style.css">
@@ -31,14 +32,19 @@
 <body>
 <div id="app">
     @if(Auth::check())
-        <storemainapp    :user="{{Auth::user()}}" :permission="{{Auth::user()->role->permission}}"></storemainapp>
+{{--        <usermainapp :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}" />--}}
+{{--        <UserMainApp :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}" />--}}
+        <storemainapp  :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}"></storemainapp>
+{{--        :permission="{{Auth::user()->role->permission}}"--}}
     @else
-        <storemainapp :user="false"></storemainapp>
+{{--        <usermainapp />--}}
+        <storemainapp ></storemainapp>
+{{--        :user="false"--}}
     @endif
 </div>
 </body>
 
-//<script src="{{mix('/js/app.js')}}"></script>
+<script src="{{mix('/js/app.js')}}"></script>
 {{--<script src="{{mix('/js/store/app.js')}}"></script>--}}
 {{--<script src="{{mix('/js/store/app.js')}}"></script>--}}
 

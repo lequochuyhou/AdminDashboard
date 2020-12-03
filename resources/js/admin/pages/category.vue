@@ -17,8 +17,9 @@
                             <!-- TABLE TITLE -->
                             <tr>
                                 <th>ID</th>
-                                <th>Image icon</th>
+<!--                                <th>Image icon</th>-->
                                 <th>Category name</th>
+                                <th>Description</th>
                                 <th>Created at</th>
                                 <th>Action</th>
                             </tr>
@@ -29,12 +30,13 @@
 
                             <tr v-for="(category,i) in categoryLists" :key="i" v-if="categoryLists.length">
                                 <td>{{category.id}}</td>
-                                <td class="table_image"><img :src="`${category.iconImage}`"/></td>
+<!--                                <td class="table_image"><img :src="`${category.iconImage}`"/></td>-->
                                 <td class="_table_name">{{category.categoryName}}</td>
+                                <td class="text-uppercase">{{category.description}}</td>
                                 <td>{{category.created_at}}</td>
                                 <td>
-                                    <Button type="info" size="small" @click="showEditModal(category,i)">Edit</Button>
-                                    <Button type="error" size="small" @click="showDeletingModal(category,i)"
+                                    <Button v-if="isUpdatePermitted" type="info" size="small" @click="showEditModal(category,i)">Edit</Button>
+                                    <Button v-if="isDeletePermitted" type="error" size="small" @click="showDeletingModal(category,i)"
                                             :loading="category.isDeleting">Delete
                                     </Button>
                                 </td>
@@ -53,34 +55,41 @@
                         :closable="false"
                     >
 
-                        <Input v-model="data.categoryName" size="large" placeholder="Add tag name"/>
                         <div class="space">
-                            <Upload
-                                ref="uploads"
-                                multiple
-                                type="drag"
-                                :headers="{'x-csrf-token':token,'X-Requested-With':'XMLHttpRequest'}"
-                                :on-success="handleSuccess"
-                                :on-error="handleError"
-                                :max-size="2048"
-                                :on-format-error="handleFormatError"
-                                :format="['jpg','jpeg','png']"
-                                :on-exceeded-size="handleMaxSize"
-
-                                action="/app/upload">
-                                <div style="padding: 20px 0">
-                                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-                                    <p>Click or drag files here to upload</p>
-                                </div>
-                            </Upload>
-                            <div class="demo-upload-list" v-if="data.iconImage">
-                                <img :src="`${data.iconImage}`"/>
-                                <div class="demo-upload-list-cover">
-                                    <Icon type="ios-trash-outline" @click="deleteImage"></Icon>
-                                </div>
-
-                            </div>
+                            <Input v-model="data.categoryName" size="large" placeholder="Add category name"/>
                         </div>
+                        <div class="space">
+                            <Input v-model="data.description" size="large" placeholder="Add description"/>
+                        </div>
+
+
+<!--                        <div class="space">-->
+<!--                            <Upload-->
+<!--                                ref="uploads"-->
+<!--                                multiple-->
+<!--                                type="drag"-->
+<!--                                :headers="{'x-csrf-token':token,'X-Requested-With':'XMLHttpRequest'}"-->
+<!--                                :on-success="handleSuccess"-->
+<!--                                :on-error="handleError"-->
+<!--                                :max-size="2048"-->
+<!--                                :on-format-error="handleFormatError"-->
+<!--                                :format="['jpg','jpeg','png']"-->
+<!--                                :on-exceeded-size="handleMaxSize"-->
+
+<!--                                action="/app/upload">-->
+<!--                                <div style="padding: 20px 0">-->
+<!--                                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>-->
+<!--                                    <p>Click or drag files here to upload</p>-->
+<!--                                </div>-->
+<!--                            </Upload>-->
+<!--                            <div class="demo-upload-list" v-if="data.iconImage">-->
+<!--                                <img :src="`${data.iconImage}`"/>-->
+<!--                                <div class="demo-upload-list-cover">-->
+<!--                                    <Icon type="ios-trash-outline" @click="deleteImage"></Icon>-->
+<!--                                </div>-->
+
+<!--                            </div>-->
+<!--                        </div>-->
                         <div slot="footer">
                             <Button type="primary" @click="addCategory" :disabled="isAdding" :loading="isAdding">
                                 {{isAdding?'Adding..':'Add category'}}
@@ -96,35 +105,40 @@
                         :mask-closable="false"
                         :closable="false"
                     >
-                        <Input v-model="editData.categoryName" size="large" placeholder="Edit tag name"/>
                         <div class="space">
-                            <Upload v-show="isIconImageNew"
-                                    ref="editDataUploads"
-                                    multiple
-                                    type="drag"
-                                    :headers="{'x-csrf-token':token,'X-Requested-With':'XMLHttpRequest'}"
-                                    :on-success="handleSuccess"
-                                    :on-error="handleError"
-                                    :max-size="2048"
-                                    :on-format-error="handleFormatError"
-                                    :format="['jpg','jpeg','png']"
-                                    :on-exceeded-size="handleMaxSize"
-
-                                    action="/app/upload">
-                                <div style="padding: 20px 0">
-                                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
-                                    <p>Click or drag files here to upload</p>
-                                </div>
-                            </Upload>
-                            <div class="demo-upload-list" v-if="editData.iconImage">
-                                <img :src="`${editData.iconImage}`"/>
-                                <div class="demo-upload-list-cover">
-                                    <Icon type="ios-trash-outline" @click="deleteImage(false)"></Icon>
-                                </div>
-
-                            </div>
-
+                            <Input v-model="editData.categoryName" size="large" placeholder="Edit category name"/>
                         </div>
+                        <div class="space">
+                            <Input v-model="editData.description" size="large" placeholder="Edit description"/>
+                        </div>
+<!--                        <div class="space">-->
+<!--                            <Upload v-show="isIconImageNew"-->
+<!--                                    ref="editDataUploads"-->
+<!--                                    multiple-->
+<!--                                    type="drag"-->
+<!--                                    :headers="{'x-csrf-token':token,'X-Requested-With':'XMLHttpRequest'}"-->
+<!--                                    :on-success="handleSuccess"-->
+<!--                                    :on-error="handleError"-->
+<!--                                    :max-size="2048"-->
+<!--                                    :on-format-error="handleFormatError"-->
+<!--                                    :format="['jpg','jpeg','png']"-->
+<!--                                    :on-exceeded-size="handleMaxSize"-->
+
+<!--                                    action="/app/upload">-->
+<!--                                <div style="padding: 20px 0">-->
+<!--                                    <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>-->
+<!--                                    <p>Click or drag files here to upload</p>-->
+<!--                                </div>-->
+<!--                            </Upload>-->
+<!--                            <div class="demo-upload-list" v-if="editData.iconImage">-->
+<!--                                <img :src="`${editData.iconImage}`"/>-->
+<!--                                <div class="demo-upload-list-cover">-->
+<!--                                    <Icon type="ios-trash-outline" @click="deleteImage(false)"></Icon>-->
+<!--                                </div>-->
+
+<!--                            </div>-->
+
+<!--                       // </div>-->
                         <div slot="footer">
                             <Button type="primary" @click="editCategory" :disabled="isAdding" :loading="isAdding">
                                 {{isAdding?'Editing..':'Edit category'}}
@@ -167,7 +181,8 @@
             return {
                 data: {
                     iconImage: '',
-                    categoryName: ''
+                    categoryName: '',
+                    description:''
                 },
                 addModal: false,
                 editModal: false,
@@ -175,7 +190,8 @@
                 categoryLists: [],
                 editData: {
                     iconImage: '',
-                    categoryName: ''
+                    categoryName: '',
+                    description:''
                 },
                 index: -1,
                 showDeleteModal: false,
@@ -192,9 +208,9 @@
                 if (this.data.categoryName.trim() == '') {
                     return this.e('Category name is required');
                 }
-                if (this.data.iconImage.trim() == '') {
-                    return this.e('Image name is required');
-                }
+                // if (this.data.iconImage.trim() == '') {
+                //     return this.e('Image name is required');
+                // }
 
                 this.data.iconImage=`${this.data.iconImage}`
                 const res = await this.callApi('post', 'app/create_category', this.data);
@@ -202,8 +218,9 @@
                     this.categoryLists.unshift(res.data);
                     this.s('Category has been added successfully!');
                     this.addModal = false;
-                    this.data.iconImage = ''
+                   // this.data.iconImage = ''
                     this.data.categoryName = ''
+                    this.data.description = ''
                 } else {
                     if (res.status == 422) {
                         if (res.data.errors.categoryName) {
@@ -222,14 +239,15 @@
                 if (this.editData.categoryName.trim() == '') {
                     return this.e('Category name is required');
                 }
-                if (this.editData.iconImage.trim() == '') {
-                    return this.e('Image name is required');
-                }
+                // if (this.editData.iconImage.trim() == '') {
+                //     return this.e('Image name is required');
+                // }
 
                 const res = await this.callApi('post', 'app/edit_category', this.editData);
                 if (res.status === 200) {
 
                     this.categoryLists[this.index].categoryName = this.editData.categoryName;
+                    this.categoryLists[this.index].description = this.editData.description;
                     this.s('Category has been add successfully!');
                     this.editModal = false;
                 } else {
@@ -279,11 +297,13 @@
                     deleteUrl:'app/delete_category',
                     data: category,
                     deletingIndex: i,
-                    isDeleted: false
-
+                    isDeleted: true
                 }
 
+                //this.categoryLists.splice(i,1);
                 this.$store.commit('setDeletingModalObj',deleteModalObj);
+
+
                 // this.deleteItem = tag;
                 // this.deletingIndex = i
                 // this.showDeleteModal = true
@@ -371,7 +391,7 @@
         },
         watch: {
                getDeleteModalObj(obj){
-                console.log(obj);
+              //  console.log(obj);
                 if(obj.isDeleted){
                   this.categoryLists.splice(obj.deletingIndex,1);
                 }
