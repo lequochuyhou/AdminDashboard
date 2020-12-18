@@ -49,7 +49,8 @@ const app = new Vue({
     //     'adminmainapp':AdminMainApp
     // }
    // storeRouter
-}).$mount("#app")
+})
+    // .$mount("#app")
 
 
 //

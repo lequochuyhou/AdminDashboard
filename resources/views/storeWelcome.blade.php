@@ -32,14 +32,10 @@
 <body>
 <div id="app">
     @if(Auth::check())
-{{--        <usermainapp :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}" />--}}
-{{--        <UserMainApp :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}" />--}}
         <storemainapp  :user="{{Auth::user()}}"  :isloggedin="{{\Illuminate\Support\Facades\Auth::check()}}"></storemainapp>
-{{--        :permission="{{Auth::user()->role->permission}}"--}}
     @else
-{{--        <usermainapp />--}}
         <storemainapp ></storemainapp>
-{{--        :user="false"--}}
+
     @endif
 </div>
 </body>

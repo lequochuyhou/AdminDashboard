@@ -219,7 +219,7 @@
                 this.$store.commit('setTotalPrice', data);
             },
             async search() {
-                const res = await this.callApi('post', '/store/search_product', this.data);
+                const res = await this.callApi('post', '/api/search_product', this.data);
                 if (res.status == 200) {
                     this.productLists = res.data
                 } else {
@@ -227,7 +227,7 @@
                 }
             },
             async addCartItem(data){
-                const res=await  this.callApi('post','/store/add_cartitem',data);
+                const res=await  this.callApi('post','/api/add_cartitem',data);
                 if(res.status===201){
                     this.s('Product added');
 
@@ -239,7 +239,7 @@
                 }
             },
             async updateCartItemQuantity(data){
-                const res=await  this.callApi('post','/store/update_cartitem_quantity',data);
+                const res=await  this.callApi('post','/api/update_cartitem_quantity',data);
                 if(res.status===200){
                     this.s('Quantity updated');
 
@@ -256,14 +256,15 @@
             this.token = window.Laravel.csrfToken;
 
             const [res, resCat, resBrand] = await Promise.all([
-                this.callApi('get', '/store/get_product'),
-                this.callApi('get', '/store/get_category'),
-                this.callApi('get', '/store/get_brand'),
+                this.callApi('get', '/api/product'),
+                this.callApi('get', '/api/category'),
+                this.callApi('get', '/api/brand'),
             ])
 
             if (res.status == 200) {
                 //console.log('Hello')
 
+                //console.log(res.data)
 
                 this.productLists = res.data
                // sessionStorage.setItem("products", res.data);

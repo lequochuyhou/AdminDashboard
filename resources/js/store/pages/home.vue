@@ -1,4 +1,5 @@
 <template>
+<!--<store-layout>-->
     <div class="mt-5" style="margin-top: 5px">
         <section class="our-services">
             <div class="container">
@@ -413,25 +414,16 @@
             </div>
         </section>
     </div>
+<!--</store-layout>-->
+
 </template>
 
 <script>
-
+    // import storeLayout from '../../Layouts/store'
 
     export default {
         data() {
             return {
-                // isLoggedin:false
-                data: {
-                    brand_id: null,
-                    category_id: null
-                },
-                productLists: [],
-                token: '',
-                brands: [],
-                categories: [],
-                dataCart: [],
-                //totalPrice:0
             }
         },
         methods: {
@@ -440,7 +432,9 @@
         async created() {
 
         },
-        components: {},
+        components: {
+            // storeLayout
+        },
         watch: {
         }
     }

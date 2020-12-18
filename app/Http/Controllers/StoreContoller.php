@@ -136,6 +136,7 @@ class StoreContoller extends Controller
     //
     public function index()
     {
+//        return true;
         return view('storeWelcome');
     }
 

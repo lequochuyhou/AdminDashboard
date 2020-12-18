@@ -75,7 +75,7 @@ Route::prefix('app')->middleware(AdminCheck::class)->group(function () {
 Route::get('/logout', [\App\Http\Controllers\AdminController::class, 'logout']);
 
 Route::get('/', [\App\Http\Controllers\AdminController::class, 'index']);
-Route::get('/store/',[\App\Http\Controllers\StoreContoller::class, 'index']);
+Route::get('/store',[\App\Http\Controllers\StoreContoller::class, 'index']);
 
 //Route::view('/store','storeWelcome');
 

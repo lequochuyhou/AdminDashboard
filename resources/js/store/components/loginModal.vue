@@ -136,6 +136,7 @@
                         user:res.data
                     }
                     this.$store.commit('setLoggedInUserObj',data)
+                    this.isLoading=false
 
                     // let pusher = new Pusher('83cd2bbd6854b79aa72e', {
                     //     cluster: 'ap1'
@@ -150,6 +151,7 @@
                     //this.$store.commit('setUserData', res.data)
 
                 } else {
+                    this.isLoading=false
                     // console.log(hello)
                     if (res.status === 401) {
                         this.i(res.data.msg);

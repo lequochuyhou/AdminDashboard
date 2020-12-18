@@ -100,7 +100,7 @@
 
                 let data=JSON.stringify(this.getCartModalObj.data);
                 this.data.products=data;
-                this.data.totalPrice=this.getCartModalObj.totalPrice;
+              //  this.data.totalPrice=this.getCartModalObj.totalPrice;
                 this.data.user_id=this.user.id
 
 
@@ -216,7 +216,7 @@
                 // const obj={
                 //      quantity:quantity
                 // }
-                const res =await this.callApi('post','/store/update_cartitem_quantity',data);
+                const res =await this.callApi('post','/api/update_cartitem_quantity',data);
 
                 if(res.status===200){
                     this.s('Updated');
@@ -227,7 +227,7 @@
                 }
             },
             async removeCartItem(data){
-                const res =await this.callApi('post','/store/delete_cartitem',data);
+                const res =await this.callApi('post','/api/delete_cartitem',data);
 
                 if(res.status===200){
                     this.s('Deleted');
@@ -243,9 +243,9 @@
             this.data.user_id=this.user.id;
            // const res=await this.callApi('post','/store/get_shoppingcart',this.data);
             const [res, resProduct,resBrand] = await Promise.all([
-                this.callApi('post','/store/get_shoppingcart',this.data),
-                this.callApi('get', '/store/get_product'),
-                this.callApi('get', '/store/get_brand'),
+                this.callApi('post','/api/get_shoppingcart',this.data),
+                this.callApi('get', '/api/product'),
+                this.callApi('get', '/api/brand'),
             ])
 
             if(res.status===200){
